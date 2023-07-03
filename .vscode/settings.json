@@ -1,0 +1,4 @@
+{
+  "eslint.workingDirectories": ["tubo", "webapi"],
+  "jest.autoRun": {}
+}

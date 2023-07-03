@@ -1,0 +1,99 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Api documentation",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/rest/auth/login": {
+      "get": {
+        "operationId": "authControllerLogin",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "AuthController"
+        ]
+      }
+    },
+    "/rest/auth/redirect": {
+      "get": {
+        "operationId": "authControllerRedirect",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "error",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "AuthController"
+        ]
+      }
+    },
+    "/rest/auth/refresh-token": {
+      "get": {
+        "operationId": "authControllerRefreshToken",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "description": "Grab a fresh access token",
+        "parameters": [],
+        "tags": [
+          "AuthController"
+        ]
+      }
+    },
+    "/rest": {
+      "get": {
+        "operationId": "indexControllerGet",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [],
+        "tags": [
+          "IndexController"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "AuthController"
+    },
+    {
+      "name": "IndexController"
+    }
+  ]
+}

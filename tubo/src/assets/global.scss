@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-400: #ffc188;
+}
+
+html {
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+@layer components {
+  .max-width {
+    @apply max-w-6xl mx-auto px-4;
+  }
+
+  .btn {
+    @apply border-4 border-black rounded-md bg-primary-400 font-semibold;
+  }
+}
