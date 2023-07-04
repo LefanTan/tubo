@@ -69,8 +69,16 @@ export class IndexController {
 
     allTracks.push(...tracks);
 
+    // Total progress is the number of requests we need to make to get all the tracks
+    const totalProgress = Math.ceil(total / 50) + Math.ceil(total / 100) - 1;
+    // Progress index is the number of requests we've made so far
+    let progressIndex = 0;
+
     res.write("event: total\n");
-    res.write(`data: ${total}\n\n`);
+    res.write(`data: ${totalProgress}\n\n`);
+
+    res.write("event: progress\n");
+    res.write(`data: ${progressIndex}\n\n`);
 
     res.write("event: tracks-pulled\n");
     res.write(`data: ${allTracks.length}\n\n`);
@@ -94,7 +102,10 @@ export class IndexController {
 
       offset++;
 
-      // wait 100ms to avoid rate limiting
+      res.write("event: progress\n");
+      res.write(`data: ${++progressIndex}\n\n`);
+
+      // wait 50ms to avoid rate limiting
       await new Promise((resolve) => {
         setTimeout(resolve, 50);
       });
@@ -103,11 +114,6 @@ export class IndexController {
     allTracks.sort((a, b) => {
       return new Date(b.added_at).getTime() - new Date(a.added_at).getTime();
     });
-
-    console.log(
-      "allTracks: ",
-      allTracks.map((track) => track.name)
-    );
 
     let tracksAdded = 0;
     while (tracksAdded < allTracks.length) {
@@ -134,6 +140,9 @@ export class IndexController {
 
         res.write("event: tracks-added\n");
         res.write(`data: ${tracksAdded}\n\n`);
+
+        res.write("event: progress\n");
+        res.write(`data: ${++progressIndex}\n\n`);
       } catch (err) {
         throw new BadRequest("Failed to add tracks: ", err);
       }

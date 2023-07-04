@@ -4,7 +4,7 @@ import { CreatePlaylistRequest } from '@/schema/models/CreatePlaylistRequest'
 import { Playlist } from '@/schema/models/Playlist'
 import useStore from '@/stores'
 import { fetchEventSource } from '@microsoft/fetch-event-source'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 
 const $store = useStore()
 let reachedEndOfPlaylists = false
@@ -14,7 +14,26 @@ const showPlaylistPopup = ref(false)
 const showCreatePlaylistPopup = ref(false)
 
 const selectedPlaylistId = ref<string>()
-const syncing = ref(false)
+
+const syncInfo = ref<{
+  syncing: boolean
+  /**
+   * Total number of actions to be performed to sync the playlist
+   */
+  total: number
+  /**
+   * Current total number of actions performed
+   */
+  progress: number
+  /**
+   * Current message to be displayed
+   */
+  message?: string
+}>({
+  syncing: false,
+  total: 0,
+  progress: 0
+})
 
 const newPlaylistForm = ref<CreatePlaylistRequest>({
   name: '',
@@ -23,6 +42,12 @@ const newPlaylistForm = ref<CreatePlaylistRequest>({
 
 const selectedPlaylist = computed(() => {
   return playlists.value.find((playlist) => playlist.id === selectedPlaylistId.value)
+})
+
+const progress = computed(() => {
+  if (!syncInfo.value.total) return 0
+
+  return syncInfo.value.progress / syncInfo.value.total
 })
 
 async function onLoad(index: number, done: () => void) {
@@ -71,9 +96,7 @@ function onSelectPlaylist(playlistId: string) {
 }
 
 async function onStartSync() {
-  if (syncing.value || !selectedPlaylistId.value) return
-
-  syncing.value = true
+  if (syncInfo.value.syncing || !selectedPlaylistId.value) return
 
   fetchEventSource(
     `${import.meta.env.VITE_WEBAPI_URL}/rest/sync?playlist_id=${selectedPlaylistId.value}`,
@@ -81,12 +104,35 @@ async function onStartSync() {
       headers: {
         Authorization: `Bearer ${webapi.request.config.TOKEN}`
       },
+      onopen: async () => {
+        syncInfo.value = {
+          syncing: true,
+          total: 0,
+          progress: 0
+        }
+
+        // Scroll to bottom of page
+        nextTick(() => {
+          window.scrollTo({
+            top: document.body.scrollHeight
+          })
+        })
+      },
       onmessage: (event) => {
-        console.log(event.event)
-        console.log(event.data)
+        if (event.event === 'total') {
+          syncInfo.value.total = event.data as any as number
+        } else if (event.event === 'progress') {
+          syncInfo.value.progress = event.data as any as number
+        } else if (event.event === 'message') {
+          syncInfo.value.message = event.data as any as string
+        } else if (event.event === 'tracks-pulled') {
+          syncInfo.value.message = 'Pulling tracks from your liked songs...'
+        } else if (event.event === 'tracks-added') {
+          syncInfo.value.message = 'Pushing tracks to your playlist...'
+        }
       },
       onclose: () => {
-        syncing.value = false
+        syncInfo.value.syncing = false
       }
     }
   )
@@ -94,8 +140,8 @@ async function onStartSync() {
 </script>
 
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header class="border-b-4 border-black bg-transparent text-black">
+  <q-layout view="hhh lpR fFf">
+    <q-header class="border-b-4 border-black bg-white text-black">
       <div class="max-width py-4 flex justify-between items-center">
         <router-link to="/" class="logo"> tubo </router-link>
 
@@ -115,14 +161,15 @@ async function onStartSync() {
           <button @click="showPlaylistPopup = true">Select Playlist</button>
         </div>
 
-        <div v-if="selectedPlaylist" class="p-4 rounded-lg bg-gray-50 w-fit max-w-lg">
+        <div v-if="selectedPlaylist" class="selected-playlist">
           <h2>Selected Playlist</h2>
-          <div class="flex flex-nowrap gap-5 items-center mt-4">
+          <div class="playlist">
             <q-img
               v-if="(selectedPlaylist.images?.length ?? 0) > 0"
               :src="selectedPlaylist.images![0].url"
-              class="rounded-full w-14 h-14 shrink-0"
+              class="img"
             />
+            <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
             <p>
               {{ selectedPlaylist.name }}
             </p>
@@ -130,7 +177,7 @@ async function onStartSync() {
         </div>
 
         <div
-          class="step ready"
+          class="step"
           :class="{
             ready: selectedPlaylistId
           }"
@@ -141,6 +188,28 @@ async function onStartSync() {
             to the playlist
           </p>
           <button @click="onStartSync">Sync</button>
+
+          <div v-if="syncInfo.syncing" class="w-full mt-8">
+            <strong class="font-logo text-base">{{ syncInfo.message }}</strong>
+            <q-linear-progress :value="progress" color="primary" class="q-mt-md" />
+          </div>
+        </div>
+
+        <div v-if="syncInfo.total > 0 && syncInfo.progress === syncInfo.total" class="done">
+          <h3>Done!</h3>
+          <p>See your playlist here</p>
+          <a :href="selectedPlaylist.spotify_url ?? ''" v-if="selectedPlaylist" class="playlist">
+            <q-img
+              v-if="(selectedPlaylist.images?.length ?? 0) > 0"
+              :src="selectedPlaylist.images![0].url"
+              class="img"
+            />
+            <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
+            <p>
+              {{ selectedPlaylist.name }}
+            </p>
+            <q-icon name="eva-external-link-outline" size="1.5rem" />
+          </a>
         </div>
       </q-page>
     </q-page-container>
@@ -238,12 +307,39 @@ async function onStartSync() {
     @apply font-logo text-2xl text-center;
   }
 
-  p {
+  > p {
     @apply mb-3;
   }
 
   button {
     @apply border-4 border-black rounded-md p-2 w-64 font-semibold bg-primary-400 text-xl;
+  }
+}
+
+.selected-playlist {
+  @apply p-4 rounded-lg bg-gray-100 w-fit max-w-lg;
+
+  .playlist {
+    @apply flex flex-nowrap gap-5 items-center mt-4;
+  }
+
+  .img {
+    @apply rounded-full w-14 h-14 shrink-0 bg-white;
+  }
+}
+
+.done {
+  @apply border-4 border-black p-4 rounded-md;
+
+  .playlist {
+    @apply flex flex-nowrap gap-5 items-center mt-4;
+  }
+
+  .img {
+    @apply rounded-full w-14 h-14 shrink-0 bg-gray-50;
+  }
+  h3 {
+    @apply font-logo text-2xl;
   }
 }
 
