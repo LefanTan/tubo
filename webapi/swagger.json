@@ -111,7 +111,7 @@
     },
     "/rest/sync": {
       "get": {
-        "operationId": "indexControllerGetSavedTracks",
+        "operationId": "indexControllerSync",
         "responses": {
           "200": {
             "description": "Success"

@@ -14,6 +14,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@quasar/extras": "^1.16.4",
     "pinia": "^2.1.3",
     "quasar": "^2.12.2",

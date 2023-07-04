@@ -3,6 +3,7 @@ import webapi from '@/lib/webapi'
 import { CreatePlaylistRequest } from '@/schema/models/CreatePlaylistRequest'
 import { Playlist } from '@/schema/models/Playlist'
 import useStore from '@/stores'
+import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { computed, ref } from 'vue'
 
 const $store = useStore()
@@ -13,6 +14,7 @@ const showPlaylistPopup = ref(false)
 const showCreatePlaylistPopup = ref(false)
 
 const selectedPlaylistId = ref<string>()
+const syncing = ref(false)
 
 const newPlaylistForm = ref<CreatePlaylistRequest>({
   name: '',
@@ -68,8 +70,26 @@ function onSelectPlaylist(playlistId: string) {
   showPlaylistPopup.value = false
 }
 
-function onStartSync() {
-  //
+async function onStartSync() {
+  if (syncing.value || !selectedPlaylistId.value) return
+
+  syncing.value = true
+
+  fetchEventSource(
+    `${import.meta.env.VITE_WEBAPI_URL}/rest/sync?playlist_id=${selectedPlaylistId.value}`,
+    {
+      headers: {
+        Authorization: `Bearer ${webapi.request.config.TOKEN}`
+      },
+      onmessage: (event) => {
+        console.log(event.event)
+        console.log(event.data)
+      },
+      onclose: () => {
+        syncing.value = false
+      }
+    }
+  )
 }
 </script>
 
@@ -105,7 +125,6 @@ function onStartSync() {
             />
             <p>
               {{ selectedPlaylist.name }}
-              d fds
             </p>
           </div>
         </div>
@@ -118,9 +137,10 @@ function onStartSync() {
         >
           <h2>Step 2. Sync!</h2>
           <p>
-            note: songs that doesn't exist in your liked songs will be <strong>replaced!</strong>
+            if there are already existing songs in the playlist, we'll just append your liked songs
+            to the playlist
           </p>
-          <button>Sync</button>
+          <button @click="onStartSync">Sync</button>
         </div>
       </q-page>
     </q-page-container>

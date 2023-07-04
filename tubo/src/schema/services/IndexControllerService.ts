@@ -23,18 +23,19 @@ export class IndexControllerService {
     }
 
     /**
-     * @param authorization
+     * Syncs the user's Spotify library with the selected playlist
+     * @param playlistId
      * @returns any Success
      * @throws ApiError
      */
-    public indexControllerGetSavedTracks(
-        authorization?: string,
+    public indexControllerSync(
+        playlistId?: string,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/rest/saved-tracks',
-            headers: {
-                'Authorization': authorization,
+            url: '/rest/sync',
+            query: {
+                'playlist_id': playlistId,
             },
         });
     }
