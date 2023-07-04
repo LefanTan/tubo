@@ -8,7 +8,8 @@ module.exports = {
         logo: ['Jua', 'sans-serif']
       },
       colors: {
-        'primary-400': 'var(--primary-400)'
+        'primary-400': 'var(--primary-400)',
+        'primary-600': 'var(--primary-600)'
       }
     }
   },

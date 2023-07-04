@@ -58,16 +58,38 @@
         ]
       }
     },
-    "/rest/auth/refresh-token": {
-      "get": {
-        "operationId": "authControllerRefreshToken",
+    "/rest/auth/profile": {
+      "post": {
+        "operationId": "authControllerProfile",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            },
             "description": "Success"
           }
         },
-        "description": "Grab a fresh access token",
+        "description": "Grab the user's Spotify and Tubo profile. Refreshes access token if needed.",
         "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
         "tags": [
           "AuthController"
         ]
@@ -86,6 +108,126 @@
           "IndexController"
         ]
       }
+    },
+    "/rest/sync": {
+      "get": {
+        "operationId": "indexControllerGetSavedTracks",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "description": "Syncs the user's Spotify library with the selected playlist",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "playlist_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "IndexController"
+        ]
+      }
+    },
+    "/rest/{user_id}/playlist": {
+      "get": {
+        "operationId": "indexControllerGetPlaylist",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Playlist"
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "default": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "default": 0
+            }
+          }
+        ],
+        "tags": [
+          "IndexController"
+        ]
+      }
+    },
+    "/rest/{user_id}/playlist/create": {
+      "post": {
+        "operationId": "indexControllerCreatePlaylist",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            },
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "createPlaylistRequest": {
+                    "$ref": "#/components/schemas/CreatePlaylistRequest"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "tags": [
+          "IndexController"
+        ]
+      }
     }
   },
   "tags": [
@@ -95,5 +237,147 @@
     {
       "name": "IndexController"
     }
-  ]
+  ],
+  "components": {
+    "schemas": {
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "tuboUser": {
+            "$ref": "#/components/schemas/User"
+          },
+          "spotifyUser": {
+            "$ref": "#/components/schemas/SpotifyUser"
+          },
+          "newAccessToken": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "display_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "SpotifyUser": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1
+          },
+          "external_urls": {
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "Image": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "height": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "url",
+          "height",
+          "width"
+        ]
+      },
+      "Playlist": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "spotify_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "CreatePlaylistRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "public": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  }
 }

@@ -1,9 +1,14 @@
 import { isProduction } from "@src/config/envs";
 import { generateRandomString } from "@src/helpers/misc";
+import { AuthMiddleware } from "@src/middlewares";
+import { ProfileResponse } from "@src/models/ProfileResponse";
+import { SpotifyUser } from "@src/models/User";
+import { SupabaseService } from "@src/services";
 import { Controller } from "@tsed/di";
-import { Unauthorized } from "@tsed/exceptions";
-import { Context, QueryParams } from "@tsed/platform-params";
-import { Description, Get, Name } from "@tsed/schema";
+import { BadRequest, Unauthorized } from "@tsed/exceptions";
+import { UseAuth } from "@tsed/platform-middlewares";
+import { BodyParams, Context, QueryParams } from "@tsed/platform-params";
+import { Description, Get, Name, Post, Returns } from "@tsed/schema";
 
 import fetch from "node-fetch";
 import querystring from "node:querystring";
@@ -14,7 +19,7 @@ export class AuthController {
   stateCompare: Set<string> = new Set();
   redirectUrl = "http://localhost:8087/rest/auth/redirect";
 
-  constructor() {
+  constructor(private readonly supabaseService: SupabaseService) {
     //
   }
 
@@ -25,7 +30,7 @@ export class AuthController {
     // Protect agains CSRF
     const state = generateRandomString(16);
     const scope =
-      "user-library-read user-library-modify user-read-email playlist-modify-public";
+      "user-library-read user-library-modify user-read-email playlist-modify-public playlist-modify-private";
 
     this.stateCompare.add(state);
 
@@ -80,18 +85,126 @@ export class AuthController {
 
     const json = await res.json();
 
-    ctx.response.cookie("access-token", json["access_token"], {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "strict",
+    ctx.response.cookie("access_token", json["access_token"], {
+      secure: true,
+      sameSite: "none",
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+    });
+
+    // Store/Update refresh token in Supabase
+    const refreshToken = json["refresh_token"];
+
+    // Get User's Spotify profile
+    const userRes = await fetch("https://api.spotify.com/v1/me", {
+      headers: {
+        Authorization: "Bearer " + json["access_token"],
+      },
+    }).then((res) => res.json() as Promise<SpotifyUser>);
+
+    // Check if user exists in Supabase, if not, create it
+    await this.supabaseService.supabase
+      .from("users")
+      .upsert({
+        id: userRes["id"],
+        display_name: userRes["display_name"],
+        refresh_token: refreshToken,
+        email: userRes["email"],
+      })
+      .select();
+
+    ctx.response.cookie("user_id", userRes["id"], {
+      secure: true,
+      sameSite: "none",
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
     });
 
     return ctx.response.redirect(302, "http://localhost:5173/app");
   }
 
-  @Get("/refresh-token")
-  @Description("Grab a fresh access token")
-  async refreshToken(@Context() ctx: Context) {
-    //
+  @Post("/profile")
+  @Description(
+    "Grab the user's Spotify and Tubo profile. Refreshes access token if needed."
+  )
+  @Returns(200, ProfileResponse)
+  @UseAuth(AuthMiddleware)
+  async profile(
+    @Context() ctx: Context,
+    @BodyParams("userId") userId: string
+  ): Promise<ProfileResponse> {
+    const token = ctx.get("token");
+
+    let [spotifyRes, tuboUserRes] = await Promise.all([
+      fetch("https://api.spotify.com/v1/me", {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }),
+      this.supabaseService.supabase.from("users").select("*").eq("id", userId),
+    ]);
+
+    const tuboUser = tuboUserRes.data?.[0];
+
+    if (!tuboUser) {
+      throw new BadRequest("Tubo User not found");
+    }
+
+    let newToken = null;
+
+    if (spotifyRes.status === 401) {
+      try {
+        newToken = await this.getRefreshToken(
+          tuboUser?.["refresh_token"] ?? ""
+        );
+
+        spotifyRes = await fetch("https://api.spotify.com/v1/me", {
+          headers: {
+            Authorization: "Bearer " + newToken,
+          },
+        });
+
+        if (!spotifyRes.ok) {
+          throw new Unauthorized("Failed to refresh token");
+        }
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    return {
+      spotifyUser: (await spotifyRes.json()) as SpotifyUser,
+      tuboUser: tuboUser,
+      newAccessToken: newToken,
+    };
+  }
+
+  async getRefreshToken(refreshToken: string): Promise<string> {
+    // Refresh access token and try again
+    const form = new URLSearchParams();
+    form.append("refresh_token", refreshToken);
+    form.append("grant_type", "refresh_token");
+
+    const refreshAccessRes = await fetch(
+      "https://accounts.spotify.com/api/token",
+      {
+        body: form,
+        headers: {
+          Authorization:
+            "Basic " +
+            Buffer.from(
+              process.env.SPOTIFY_CLIENT_ID +
+                ":" +
+                process.env.SPOTIFY_CLIENT_SECRET
+            ).toString("base64"),
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      }
+    )
+      .catch((err) => {
+        throw new Error("Failed to refresh access token");
+      })
+      .then((res) => res.json());
+
+    return refreshAccessRes["access_token"];
   }
 }

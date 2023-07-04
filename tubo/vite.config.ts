@@ -11,7 +11,9 @@ export default defineConfig({
     vue({
       template: { transformAssetUrls }
     }),
-    quasar()
+    quasar({
+      sassVariables: '@/assets/variables.scss'
+    })
   ],
   resolve: {
     alias: {

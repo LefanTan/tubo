@@ -1,6 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ProfileResponse } from '../models/ProfileResponse';
+
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 
@@ -43,14 +45,21 @@ export class AuthControllerService {
     }
 
     /**
-     * Grab a fresh access token
-     * @returns any Success
+     * Grab the user's Spotify and Tubo profile. Refreshes access token if needed.
+     * @param requestBody
+     * @returns ProfileResponse Success
      * @throws ApiError
      */
-    public authControllerRefreshToken(): CancelablePromise<any> {
+    public authControllerProfile(
+        requestBody?: {
+            userId?: string;
+        },
+    ): CancelablePromise<ProfileResponse> {
         return this.httpRequest.request({
-            method: 'GET',
-            url: '/rest/auth/refresh-token',
+            method: 'POST',
+            url: '/rest/auth/profile',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 

@@ -1,4 +1,3 @@
 {
-  "eslint.workingDirectories": ["tubo", "webapi"],
-  "jest.autoRun": {}
+  "eslint.workingDirectories": ["./tubo", "./webapi"]
 }

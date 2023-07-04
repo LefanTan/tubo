@@ -7,6 +7,7 @@ import "@tsed/swagger";
 import { config } from "./config/index";
 import * as rest from "./controllers/rest/index";
 import { isProduction } from "./config/envs";
+import cors from "cors";
 
 @Configuration({
   ...config,
@@ -26,7 +27,6 @@ import { isProduction } from "./config/envs";
     },
   ],
   middlewares: [
-    "cors",
     "cookie-parser",
     "compression",
     "method-override",
@@ -47,4 +47,13 @@ export class Server {
 
   @Configuration()
   protected settings: Configuration;
+
+  $beforeRoutesInit() {
+    this.app.use(
+      cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+      })
+    );
+  }
 }
