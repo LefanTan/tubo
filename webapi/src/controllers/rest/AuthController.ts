@@ -17,7 +17,11 @@ import querystring from "node:querystring";
 @Name("AuthController")
 export class AuthController {
   stateCompare: Set<string> = new Set();
-  redirectUrl = "http://localhost:8087/rest/auth/redirect";
+  redirectUrl = isProduction
+    ? "https://api.tubo.live/rest/auth/redirect"
+    : "http://localhost:8087/rest/auth/redirect";
+
+  appUrl = isProduction ? "https://tubo.live/app" : "http://localhost:5173/app";
 
   constructor(private readonly supabaseService: SupabaseService) {
     //
@@ -118,7 +122,7 @@ export class AuthController {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
     });
 
-    return ctx.response.redirect(302, "http://localhost:5173/app");
+    return ctx.response.redirect(302, this.appUrl);
   }
 
   @Post("/profile")
