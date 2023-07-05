@@ -11,7 +11,7 @@
         data-full-width-responsive="true"
       ></ins>
 
-      <div class="flex-1 min-w-[20rem] mr-20">
+      <div class="flex-1 min-w-[20rem] sm:mr-20">
         <h1
           class="font-logo text-4xl sm:text-6xl [&>strong]:text-primary-400 [&>strong]:font-normal sm:leading-tight"
         >

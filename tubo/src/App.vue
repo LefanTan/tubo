@@ -19,7 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <q-layout view="hhh lpR fFf">
+  <q-layout view="hhh lpR fff">
     <q-header class="border-b-4 border-black bg-white text-black">
       <div class="max-width py-4 flex justify-between items-center">
         <router-link to="/" class="logo"> tubo </router-link>
@@ -49,7 +49,15 @@ onMounted(() => {
       <router-view />
     </q-page-container>
 
-    <!-- footer -->
+    <q-footer class="footer">
+      <div class="wrapper">
+        <h5 class="logo">Tubo</h5>
+
+        <div class="links">
+          <a href="mailto:lefantan@hotmail.com">Contact Me</a>
+        </div>
+      </div>
+    </q-footer>
 
     <div class="banner-bottom">
       <!-- banner-bottom -->
@@ -60,14 +68,30 @@ onMounted(() => {
         data-ad-slot="4354502074"
       ></ins>
     </div>
-
-    <q-footer> </q-footer>
   </q-layout>
 </template>
 
 <style lang="scss">
 .banner-bottom {
-  @apply fixed bottom-0 left-0 right-0 bg-gray-600/10;
+  @apply fixed bottom-0 left-0 right-0 bg-gray-600/40;
   max-height: 100px;
+  z-index: 9999;
+}
+
+.footer {
+  @apply border-t-4 border-black text-black font-medium;
+
+  .wrapper {
+    @apply max-width py-8;
+    margin-bottom: 100px;
+  }
+
+  .logo {
+    @apply font-logo text-3xl;
+  }
+
+  .links {
+    @apply mt-4;
+  }
 }
 </style>
