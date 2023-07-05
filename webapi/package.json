@@ -12,7 +12,7 @@
     "migrate": "supabase db diff -f",
     "deploy-migrate": "supabase db push",
     "codegen": "openapi --input ./swagger.json --output ../tubo/src/schema --name WebAPI",
-    "codegen-local": " && supabase gen types typescript --local > ./src/models/types.ts && cp ./src/models/types.ts ../tubo/src/schema/models/types.ts"
+    "codegen-local": "supabase gen types typescript --local > ./src/models/types.ts && cp ./src/models/types.ts ../tubo/src/schema/models/types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.26.0",
