@@ -93,7 +93,7 @@ export class AuthController {
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      path: isProduction ? "https://tubo.live" : "/",
+      domain: isProduction ? "tubo.live" : "localhost",
     });
 
     // Store/Update refresh token in Supabase
@@ -121,7 +121,7 @@ export class AuthController {
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      path: isProduction ? "https://tubo.live" : "/",
+      domain: isProduction ? "tubo.live" : "localhost",
     });
 
     return ctx.response.redirect(302, this.appUrl);
