@@ -4,6 +4,8 @@
 name: Tubo Client - Deploy to Firebase Hosting on merge
 "on":
   push:
+    paths:
+      - "tubo/**"
     branches:
       - main
 jobs:
