@@ -140,80 +140,64 @@ async function onStartSync() {
 </script>
 
 <template>
-  <q-layout view="hhh lpR fFf">
-    <q-header class="border-b-4 border-black bg-white text-black">
-      <div class="max-width py-4 flex justify-between items-center">
-        <router-link to="/" class="logo"> tubo </router-link>
+  <q-page>
+    <div class="step ready">
+      <h2>Step 1. Select or Create a playlist</h2>
+      <p>we'll place all your liked songs into this playlist</p>
+      <button @click="showPlaylistPopup = true">Select Playlist</button>
+    </div>
 
+    <div v-if="selectedPlaylist" class="selected-playlist">
+      <h2>Selected Playlist</h2>
+      <div class="playlist">
         <q-img
-          :src="$store.user.spotifyUser?.images?.[0].url"
-          class="w-14 h-14 rounded-full"
-          alt="profile image"
+          v-if="(selectedPlaylist.images?.length ?? 0) > 0"
+          :src="selectedPlaylist.images![0].url"
+          class="img"
         />
+        <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
+        <p>
+          {{ selectedPlaylist.name }}
+        </p>
       </div>
-    </q-header>
+    </div>
 
-    <q-page-container>
-      <q-page>
-        <div class="step ready">
-          <h2>Step 1. Select or Create a playlist</h2>
-          <p>we'll place all your liked songs into this playlist</p>
-          <button @click="showPlaylistPopup = true">Select Playlist</button>
-        </div>
+    <div
+      class="step"
+      :class="{
+        ready: selectedPlaylistId
+      }"
+    >
+      <h2>Step 2. Sync!</h2>
+      <p>
+        if there are already existing songs in the playlist, we'll just append your liked songs to
+        the playlist
+      </p>
+      <button @click="onStartSync">Sync</button>
 
-        <div v-if="selectedPlaylist" class="selected-playlist">
-          <h2>Selected Playlist</h2>
-          <div class="playlist">
-            <q-img
-              v-if="(selectedPlaylist.images?.length ?? 0) > 0"
-              :src="selectedPlaylist.images![0].url"
-              class="img"
-            />
-            <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
-            <p>
-              {{ selectedPlaylist.name }}
-            </p>
-          </div>
-        </div>
+      <div v-if="syncInfo.syncing" class="w-full mt-8">
+        <strong class="font-logo text-base">{{ syncInfo.message }}</strong>
+        <q-linear-progress :value="progress" color="primary" class="q-mt-md" />
+      </div>
+    </div>
 
-        <div
-          class="step"
-          :class="{
-            ready: selectedPlaylistId
-          }"
-        >
-          <h2>Step 2. Sync!</h2>
-          <p>
-            if there are already existing songs in the playlist, we'll just append your liked songs
-            to the playlist
-          </p>
-          <button @click="onStartSync">Sync</button>
-
-          <div v-if="syncInfo.syncing" class="w-full mt-8">
-            <strong class="font-logo text-base">{{ syncInfo.message }}</strong>
-            <q-linear-progress :value="progress" color="primary" class="q-mt-md" />
-          </div>
-        </div>
-
-        <div v-if="syncInfo.total > 0 && syncInfo.progress === syncInfo.total" class="done">
-          <h3>Done!</h3>
-          <p>See your playlist here</p>
-          <a :href="selectedPlaylist.spotify_url ?? ''" v-if="selectedPlaylist" class="playlist">
-            <q-img
-              v-if="(selectedPlaylist.images?.length ?? 0) > 0"
-              :src="selectedPlaylist.images![0].url"
-              class="img"
-            />
-            <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
-            <p>
-              {{ selectedPlaylist.name }}
-            </p>
-            <q-icon name="eva-external-link-outline" size="1.5rem" />
-          </a>
-        </div>
-      </q-page>
-    </q-page-container>
-  </q-layout>
+    <div v-if="syncInfo.total > 0 && syncInfo.progress === syncInfo.total" class="done">
+      <h3>Done!</h3>
+      <p>See your playlist here</p>
+      <a :href="selectedPlaylist.spotify_url ?? ''" v-if="selectedPlaylist" class="playlist">
+        <q-img
+          v-if="(selectedPlaylist.images?.length ?? 0) > 0"
+          :src="selectedPlaylist.images![0].url"
+          class="img"
+        />
+        <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
+        <p>
+          {{ selectedPlaylist.name }}
+        </p>
+        <q-icon name="eva-external-link-outline" size="1.5rem" />
+      </a>
+    </div>
+  </q-page>
 
   <q-dialog class="dialog playlist-dialog" v-model="showPlaylistPopup">
     <div class="content">
@@ -308,7 +292,7 @@ async function onStartSync() {
   }
 
   > p {
-    @apply mb-3;
+    @apply mb-3 text-center;
   }
 
   button {
