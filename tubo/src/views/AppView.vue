@@ -98,9 +98,10 @@ function onSelectPlaylist(playlistId: string) {
 async function onStartSync() {
   if (syncInfo.value.syncing || !selectedPlaylistId.value) return
 
-  fetchEventSource(
+  await fetchEventSource(
     `${import.meta.env.VITE_WEBAPI_URL}/rest/sync?playlist_id=${selectedPlaylistId.value}`,
     {
+      openWhenHidden: true,
       headers: {
         Authorization: `Bearer ${webapi.request.config.TOKEN}`
       },
@@ -133,6 +134,9 @@ async function onStartSync() {
       },
       onclose: () => {
         syncInfo.value.syncing = false
+      },
+      onerror(err) {
+        console.log(err)
       }
     }
   )
@@ -159,6 +163,10 @@ async function onStartSync() {
         <p>
           {{ selectedPlaylist.name }}
         </p>
+
+        <a :href="selectedPlaylist.spotify_url ?? '/'" class="ml-auto">
+          <q-img src="/spotify.png" class="spotify-logo" />
+        </a>
       </div>
     </div>
 
@@ -194,7 +202,8 @@ async function onStartSync() {
         <p>
           {{ selectedPlaylist.name }}
         </p>
-        <q-icon name="eva-external-link-outline" size="1.5rem" />
+
+        <q-img src="/spotify.png" class="spotify-logo" />
       </a>
     </div>
   </q-page>
@@ -208,24 +217,28 @@ async function onStartSync() {
         </button>
       </div>
       <q-infinite-scroll :initial-index="-1" @load="onLoad" :offset="500">
-        <button
-          class="playlist"
-          :class="{
-            selected: playlist.id === selectedPlaylistId
-          }"
-          v-for="playlist in playlists"
-          :key="playlist.id"
-          @click="onSelectPlaylist(playlist.id)"
-        >
-          <q-img
-            v-if="(playlist.images?.length ?? 0) > 0"
-            :src="playlist.images![0].url"
-            class="img"
-          />
-          <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
+        <div class="playlist" v-for="playlist in playlists" :key="playlist.id">
+          <button
+            class="playlist-content"
+            :class="{
+              selected: playlist.id === selectedPlaylistId
+            }"
+            @click="onSelectPlaylist(playlist.id)"
+          >
+            <q-img
+              v-if="(playlist.images?.length ?? 0) > 0"
+              :src="playlist.images![0].url"
+              class="img"
+            />
+            <q-icon v-else name="eva-music-outline" class="img" size="1.5rem" />
 
-          <p>{{ playlist.name }}</p>
-        </button>
+            <p>{{ playlist.name }}</p>
+          </button>
+
+          <a :href="playlist.spotify_url ?? '/'" class="ml-auto">
+            <q-img src="/spotify.png" class="spotify-logo" />
+          </a>
+        </div>
         <template v-slot:loading>
           <div class="flex justify-center">
             <q-spinner-dots color="primary" size="40px" />
@@ -300,15 +313,23 @@ async function onStartSync() {
   }
 }
 
+.spotify-logo {
+  @apply w-8 h-8;
+}
+
 .selected-playlist {
   @apply p-4 rounded-lg bg-gray-100 w-fit max-w-lg;
 
   .playlist {
     @apply flex flex-nowrap gap-5 items-center mt-4;
+
+    > a {
+      @apply w-8 h-8;
+    }
   }
 
   .img {
-    @apply rounded-full w-14 h-14 shrink-0 bg-white;
+    @apply w-14 h-14 shrink-0 rounded-sm bg-white;
   }
 }
 
@@ -320,8 +341,9 @@ async function onStartSync() {
   }
 
   .img {
-    @apply rounded-full w-14 h-14 shrink-0 bg-gray-50;
+    @apply w-14 h-14 shrink-0 rounded-sm bg-gray-50;
   }
+
   h3 {
     @apply font-logo text-2xl;
   }
@@ -355,14 +377,30 @@ async function onStartSync() {
 
 .playlist-dialog {
   .playlist {
-    @apply flex items-center gap-4 w-full duration-200 hover:bg-gray-100 cursor-pointer p-3 rounded-md;
+    @apply flex items-center gap-4 w-full cursor-pointer;
 
-    .img {
-      @apply w-12 h-12 rounded-full bg-gray-200;
+    &-content {
+      @apply flex-1 flex items-center gap-4 p-2 sm:p-3 rounded-md hover:bg-gray-100 duration-200;
+
+      .img {
+        @apply w-12 h-12 rounded-sm shrink-0 bg-gray-200;
+      }
+
+      > p {
+        @apply text-sm sm:text-base text-left;
+      }
+
+      &.selected {
+        @apply border-4 border-black;
+      }
     }
 
-    &.selected {
-      @apply border-4 border-black;
+    > a {
+      @apply shrink-0;
+    }
+
+    .spotify-logo {
+      @apply shrink-0 w-5 h-5 sm:w-8 sm:h-8;
     }
   }
 
