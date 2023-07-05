@@ -34,7 +34,7 @@ export class AuthController {
     // Protect agains CSRF
     const state = generateRandomString(16);
     const scope =
-      "user-library-read user-library-modify user-read-email playlist-modify-public playlist-modify-private";
+      "user-library-read user-read-email playlist-modify-public playlist-modify-private";
 
     this.stateCompare.add(state);
 
