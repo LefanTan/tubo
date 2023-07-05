@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterView, useRoute } from 'vue-router'
 import useStore from './stores'
+import { onMounted } from 'vue'
 
 const $store = useStore()
 const routes = useRoute()
@@ -8,6 +9,13 @@ const routes = useRoute()
 function onLogout() {
   $store.user.logout()
 }
+
+onMounted(() => {
+  const push = document.createElement('script')
+  push.innerHTML = `(adsbygoogle = window.adsbygoogle || []).push({});`
+
+  document.head.appendChild(push)
+})
 </script>
 
 <template>
@@ -40,5 +48,26 @@ function onLogout() {
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!-- footer -->
+
+    <div class="banner-bottom">
+      <!-- banner-bottom -->
+      <ins
+        class="adsbygoogle"
+        style="display: inline-block; width: 728px; height: 90px"
+        data-ad-client="ca-pub-9640914157903339"
+        data-ad-slot="4354502074"
+      ></ins>
+    </div>
+
+    <q-footer> </q-footer>
   </q-layout>
 </template>
+
+<style lang="scss">
+.banner-bottom {
+  @apply fixed bottom-0 left-0 right-0 bg-gray-600/10;
+  max-height: 100px;
+}
+</style>

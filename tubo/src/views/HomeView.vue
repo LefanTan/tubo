@@ -1,7 +1,17 @@
 <template>
   <q-page>
-    <div class="max-width flex items-center justify-center gap-x-28 gap-y-10 py-8">
-      <div class="flex-1 min-w-[20rem]">
+    <div class="max-width flex items-center justify-center gap-y-10 py-8">
+      <!-- left side ads -->
+      <ins
+        class="adsbygoogle"
+        style="display: block"
+        data-ad-client="ca-pub-9640914157903339"
+        data-ad-slot="3927960815"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      ></ins>
+
+      <div class="flex-1 min-w-[20rem] mr-20">
         <h1
           class="font-logo text-4xl sm:text-6xl [&>strong]:text-primary-400 [&>strong]:font-normal sm:leading-tight"
         >
@@ -17,6 +27,16 @@
       <div class="max-w-[20rem]">
         <router-link to="/login"><img src="/hero.png" /></router-link>
       </div>
+
+      <!-- right -->
+      <ins
+        class="adsbygoogle"
+        style="display: block"
+        data-ad-client="ca-pub-9640914157903339"
+        data-ad-slot="9169459451"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      ></ins>
     </div>
   </q-page>
 </template>
