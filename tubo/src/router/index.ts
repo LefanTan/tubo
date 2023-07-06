@@ -5,10 +5,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('@/views/HomeView.vue'),
+      name: 'sync',
+      component: () => import('@/views/AppView.vue'),
       meta: {
-        startNowBtn: true
+        requiresAuth: true
       }
     },
     {
@@ -17,14 +17,6 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
       meta: {
         nonAuthOnly: true
-      }
-    },
-    {
-      path: '/app',
-      name: 'app',
-      component: () => import('@/views/AppView.vue'),
-      meta: {
-        requiresAuth: true
       }
     }
   ]

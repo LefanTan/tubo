@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
-    "build-only": "vite build && npm run docs:build && cp -r static/.vitepress/dist dist/static",
+    "build-only": "vite build && npm run docs:build && cp -r static/.vitepress/dist/* dist",
     "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
     "deploy": "npm run build && npx firebase deploy",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
