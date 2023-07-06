@@ -13,7 +13,7 @@
     "deploy": "npm run build && npx firebase deploy",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "docs:dev": "vitepress dev static",
+    "docs:dev": "vitepress dev static --port 5174",
     "docs:build": "vitepress build static",
     "docs:preview": "vitepress preview static"
   },
