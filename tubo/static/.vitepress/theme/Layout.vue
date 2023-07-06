@@ -39,7 +39,7 @@ const { site, frontmatter } = useData()
       </div>
 
       <div class="max-w-[20rem]">
-        <router-link to="/login"><img src="/hero.png" /></router-link>
+        <a href="/login"><img src="/hero.png" /></a>
       </div>
 
       <!-- right -->
