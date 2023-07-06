@@ -9,7 +9,7 @@ const { site, frontmatter } = useData()
   <div class="border-b-4 border-black bg-white text-black">
     <div class="max-width py-4 flex justify-between items-center">
       <a href="/" class="logo"> tubo </a>
-      <a href="/app/login" class="btn px-8 py-3 text-2xl">start now</a>
+      <a href="https://tubo.live/app/login" class="btn px-8 py-3 text-2xl">start now</a>
     </div>
   </div>
 
