@@ -22,7 +22,7 @@ onMounted(() => {
   <q-layout view="hhh lpR fff">
     <q-header class="border-b-4 border-black bg-white text-black">
       <div class="max-width py-4 flex justify-between items-center">
-        <router-link to="/" class="logo"> tubo </router-link>
+        <a href="/" class="logo"> tubo </a>
 
         <router-link v-if="routes.meta.startNowBtn" to="/login" class="btn px-8 py-3 text-2xl"
           >start now</router-link
