@@ -52,7 +52,7 @@ export default function userNavGuard(router: Router) {
     }
 
     if (nonAuthOnly && profileRes) {
-      next('/app')
+      next('/')
       return
     }
 
