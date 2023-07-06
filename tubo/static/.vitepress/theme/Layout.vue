@@ -39,7 +39,7 @@ const { site, frontmatter } = useData()
       </div>
 
       <div class="max-w-[20rem]">
-        <a href="/login"><img src="/hero.png" /></a>
+        <a href="/app/login"><img src="/hero.png" /></a>
       </div>
 
       <!-- right -->
