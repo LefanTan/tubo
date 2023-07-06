@@ -12,6 +12,7 @@ const { site, frontmatter } = useData()
     <ul>
       <li><a href="/markdown-examples.html">Markdown Examples</a></li>
       <li><a href="/api-examples.html">API Examples</a></li>
+      <li><a href="/app">Go to App</a></li>
     </ul>
   </div>
   <div v-else>
