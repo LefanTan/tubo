@@ -7,8 +7,8 @@ const { site, frontmatter } = useData()
 
 <template>
   <div v-if="frontmatter.home">
-    <h1 class="text-3xl">{{ site.title }}</h1>
-    <p>{{ site.description }}</p>
+    <h1>{{ site.title }}</h1>
+    <p class="font-semibold">{{ site.description }}</p>
     <ul>
       <li><a href="/markdown-examples.html">Markdown Examples</a></li>
       <li><a href="/api-examples.html">API Examples</a></li>
