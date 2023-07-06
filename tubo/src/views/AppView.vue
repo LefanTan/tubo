@@ -210,7 +210,7 @@ async function onStartSync() {
 
   <q-dialog class="dialog playlist-dialog" v-model="showPlaylistPopup">
     <div class="content">
-      <div class="header">
+      <div class="dialog-header">
         <h2>Select or Create Playlist</h2>
         <button @click="showCreatePlaylistPopup = true">
           <q-icon name="eva-plus-outline" size="1.5rem" />
@@ -250,7 +250,7 @@ async function onStartSync() {
 
   <q-dialog class="dialog create-playlist-dialog" v-model="showCreatePlaylistPopup">
     <div class="content">
-      <div class="header">
+      <div class="dialog-header">
         <h2>Create New Playlist</h2>
       </div>
       <q-form class="form" @submit.stop="onCreatePlaylistSubmit">
@@ -269,7 +269,7 @@ async function onStartSync() {
         />
         <q-checkbox v-model="newPlaylistForm.public" label="Public" />
 
-        <div class="footer">
+        <div class="dialog-footer">
           <q-btn
             unelevated
             no-caps
@@ -354,11 +354,11 @@ async function onStartSync() {
   height: 35rem;
   width: 30rem;
 
-  .header {
+  .dialog-header {
     @apply flex justify-between items-center mb-4;
   }
 
-  .footer {
+  .dialog-footer {
     button[type='submit'] {
       @apply border-4 border-black border-solid rounded-md px-4 py-2 bg-primary-400;
     }
@@ -418,7 +418,7 @@ async function onStartSync() {
     @apply flex flex-col gap-2 flex-1;
   }
 
-  .footer {
+  .dialog-footer {
     @apply flex justify-between items-center mt-auto;
   }
 }
