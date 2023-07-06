@@ -165,7 +165,7 @@ async function onStartSync() {
         </p>
 
         <a :href="selectedPlaylist.spotify_url ?? '/'" class="ml-auto">
-          <q-img src="/spotify.png" class="spotify-logo" />
+          <q-img src="/app/spotify.png" class="spotify-logo" />
         </a>
       </div>
     </div>
@@ -203,7 +203,7 @@ async function onStartSync() {
           {{ selectedPlaylist.name }}
         </p>
 
-        <q-img src="/spotify.png" class="spotify-logo" />
+        <q-img src="/app/spotify.png" class="spotify-logo" />
       </a>
     </div>
   </q-page>
@@ -236,7 +236,7 @@ async function onStartSync() {
           </button>
 
           <a :href="playlist.spotify_url ?? '/'" class="ml-auto">
-            <q-img src="/spotify.png" class="spotify-logo" />
+            <q-img src="/app/spotify.png" class="spotify-logo" />
           </a>
         </div>
         <template v-slot:loading>
