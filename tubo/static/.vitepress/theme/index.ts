@@ -1,6 +1,7 @@
 // https://vitepress.dev/guide/custom-theme
 import Layout from './Layout.vue'
-import './tailwind.postcss'
+import '../../../src/assets/global.scss'
+import './styles.scss'
 
 export default {
   Layout,
