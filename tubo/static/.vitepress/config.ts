@@ -4,5 +4,6 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Tubo',
   description: 'Tubo - Share',
-  cleanUrls: true
+  cleanUrls: true,
+  mpa: true
 })
