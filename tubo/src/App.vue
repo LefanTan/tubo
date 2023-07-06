@@ -77,21 +77,4 @@ onMounted(() => {
   max-height: 100px;
   z-index: 9999;
 }
-
-.footer {
-  @apply border-t-4 border-black text-black font-medium;
-
-  .wrapper {
-    @apply max-width py-8;
-    margin-bottom: 100px;
-  }
-
-  .logo {
-    @apply font-logo text-3xl;
-  }
-
-  .links {
-    @apply mt-4;
-  }
-}
 </style>

@@ -32,3 +32,4 @@ playwright-report/
 .env
 
 .firebase
+.vitpress/cache
