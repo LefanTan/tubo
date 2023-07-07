@@ -59,7 +59,7 @@ onMounted(() => {
       </div>
     </q-footer>
 
-    <div class="banner-bottom">
+    <!-- <div class="banner-bottom">
       <!-- banner-bottom -->
       <ins
         class="adsbygoogle"
@@ -67,7 +67,7 @@ onMounted(() => {
         data-ad-client="ca-pub-9640914157903339"
         data-ad-slot="4354502074"
       ></ins>
-    </div>
+    </div> -->
   </q-layout>
 </template>
 
