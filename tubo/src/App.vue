@@ -60,7 +60,6 @@ onMounted(() => {
     </q-footer>
 
     <!-- <div class="banner-bottom">
-      <!-- banner-bottom -->
       <ins
         class="adsbygoogle"
         style="display: inline-block; width: 728px; height: 90px"
