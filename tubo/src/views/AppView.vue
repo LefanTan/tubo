@@ -93,6 +93,12 @@ async function onCreatePlaylistSubmit() {
 function onSelectPlaylist(playlistId: string) {
   selectedPlaylistId.value = playlistId
   showPlaylistPopup.value = false
+
+  syncInfo.value = {
+    syncing: false,
+    total: 0,
+    progress: 0
+  }
 }
 
 async function onStartSync() {
