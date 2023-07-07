@@ -131,12 +131,9 @@ export class IndexController {
     const existingPlaylistItemTotal =
       existingPlaylistItemTotalRes["total"] ?? 0;
 
-    console.log("total", existingPlaylistItemTotal);
-
     let tracksAdded = 0;
 
-    // If the playlist already has tracks, replace them
-    while (tracksAdded < existingPlaylistItemTotal) {
+    if (existingPlaylistItemTotal > 0) {
       // Add 100 tracks at a time
       const tracksToAdd = allTracks.slice(
         tracksAdded,
@@ -168,10 +165,6 @@ export class IndexController {
       } catch (err) {
         throw new BadRequest("Failed to replace tracks: ", err);
       }
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 50);
-      });
     }
 
     // Push all remaining liked tracks to the playlist
