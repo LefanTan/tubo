@@ -131,12 +131,17 @@ export class IndexController {
     const existingPlaylistItemTotal =
       existingPlaylistItemTotalRes["total"] ?? 0;
 
+    console.log("total", existingPlaylistItemTotal);
+
     let tracksAdded = 0;
 
     // If the playlist already has tracks, replace them
     while (tracksAdded < existingPlaylistItemTotal) {
       // Add 100 tracks at a time
-      const tracksToAdd = allTracks.slice(tracksAdded, tracksAdded + 100);
+      const tracksToAdd = allTracks.slice(
+        tracksAdded,
+        Math.min(existingPlaylistItemTotal, tracksAdded + 100)
+      );
 
       try {
         await makeSpotifyRequestWithBackoff(
@@ -161,11 +166,11 @@ export class IndexController {
         res.write("event: progress\n");
         res.write(`data: ${++progressIndex}\n\n`);
       } catch (err) {
-        throw new BadRequest("Failed to add tracks: ", err);
+        throw new BadRequest("Failed to replace tracks: ", err);
       }
 
       await new Promise((resolve) => {
-        setTimeout(resolve, 100);
+        setTimeout(resolve, 50);
       });
     }
 
@@ -200,6 +205,10 @@ export class IndexController {
       } catch (err) {
         throw new BadRequest("Failed to add tracks: ", err);
       }
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 25);
+      });
     }
 
     res.end();

@@ -26,6 +26,7 @@
     "vue-router": "^4.2.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.0.4",
     "@playwright/test": "^1.35.0",
     "@quasar/vite-plugin": "^1.4.1",
     "@rushstack/eslint-patch": "^1.2.0",
