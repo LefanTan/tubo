@@ -164,42 +164,42 @@ export class IndexController {
         throw new BadRequest("Failed to add tracks: ", err);
       }
 
-      // Push all remaining liked tracks to the playlist
-      while (tracksAdded < allTracks.length) {
-        // Add 100 tracks at a time
-        const tracksToAdd = allTracks.slice(tracksAdded, tracksAdded + 100);
-
-        try {
-          await makeSpotifyRequestWithBackoff(
-            `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                position: tracksAdded,
-                uris: tracksToAdd.map((track) => track.uri),
-              }),
-            }
-          );
-
-          tracksAdded += tracksToAdd.length;
-
-          res.write("event: tracks-added\n");
-          res.write(`data: ${tracksAdded}\n\n`);
-
-          res.write("event: progress\n");
-          res.write(`data: ${++progressIndex}\n\n`);
-        } catch (err) {
-          throw new BadRequest("Failed to add tracks: ", err);
-        }
-      }
-
       await new Promise((resolve) => {
         setTimeout(resolve, 100);
       });
+    }
+
+    // Push all remaining liked tracks to the playlist
+    while (tracksAdded < allTracks.length) {
+      // Add 100 tracks at a time
+      const tracksToAdd = allTracks.slice(tracksAdded, tracksAdded + 100);
+
+      try {
+        await makeSpotifyRequestWithBackoff(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + token,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              position: tracksAdded,
+              uris: tracksToAdd.map((track) => track.uri),
+            }),
+          }
+        );
+
+        tracksAdded += tracksToAdd.length;
+
+        res.write("event: tracks-added\n");
+        res.write(`data: ${tracksAdded}\n\n`);
+
+        res.write("event: progress\n");
+        res.write(`data: ${++progressIndex}\n\n`);
+      } catch (err) {
+        throw new BadRequest("Failed to add tracks: ", err);
+      }
     }
 
     res.end();
