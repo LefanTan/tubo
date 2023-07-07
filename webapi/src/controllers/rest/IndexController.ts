@@ -63,11 +63,11 @@ export class IndexController {
 
     const allTracks: Track[] = [];
 
-    const { tracks, total } = await convertTrackResponseToTracks(
+    const { tracks: firstTracks, total } = await convertTrackResponseToTracks(
       firstSavedTracksRes
     );
 
-    allTracks.push(...tracks);
+    allTracks.push(...firstTracks);
 
     // Total progress is the number of requests we need to make to get all the tracks
     const totalProgress = Math.ceil(total / 50) + Math.ceil(total / 100) - 1;
@@ -83,6 +83,7 @@ export class IndexController {
     res.write("event: tracks-pulled\n");
     res.write(`data: ${allTracks.length}\n\n`);
 
+    // Keep requesting tracks until we have all of them
     while (allTracks.length < total) {
       const results = await makeSpotifyRequestWithBackoff(
         `https://api.spotify.com/v1/me/tracks?limit=50&offset=${offset * 50}`,
@@ -115,8 +116,25 @@ export class IndexController {
       return new Date(b.added_at).getTime() - new Date(a.added_at).getTime();
     });
 
+    // Get existing playlist items
+    const existingPlaylistItemTotalRes = await makeSpotifyRequestWithBackoff(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks?fields=total`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((res) => res.json());
+
+    const existingPlaylistItemTotal =
+      existingPlaylistItemTotalRes["total"] ?? 0;
+
     let tracksAdded = 0;
-    while (tracksAdded < allTracks.length) {
+
+    // If the playlist already has tracks, replace them
+    while (tracksAdded < existingPlaylistItemTotal) {
       // Add 100 tracks at a time
       const tracksToAdd = allTracks.slice(tracksAdded, tracksAdded + 100);
 
@@ -124,13 +142,12 @@ export class IndexController {
         await makeSpotifyRequestWithBackoff(
           `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
           {
-            method: "POST",
+            method: "PUT",
             headers: {
               Authorization: "Bearer " + token,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              position: tracksAdded,
               uris: tracksToAdd.map((track) => track.uri),
             }),
           }
@@ -145,6 +162,39 @@ export class IndexController {
         res.write(`data: ${++progressIndex}\n\n`);
       } catch (err) {
         throw new BadRequest("Failed to add tracks: ", err);
+      }
+
+      // Push all remaining liked tracks to the playlist
+      while (tracksAdded < allTracks.length) {
+        // Add 100 tracks at a time
+        const tracksToAdd = allTracks.slice(tracksAdded, tracksAdded + 100);
+
+        try {
+          await makeSpotifyRequestWithBackoff(
+            `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                position: tracksAdded,
+                uris: tracksToAdd.map((track) => track.uri),
+              }),
+            }
+          );
+
+          tracksAdded += tracksToAdd.length;
+
+          res.write("event: tracks-added\n");
+          res.write(`data: ${tracksAdded}\n\n`);
+
+          res.write("event: progress\n");
+          res.write(`data: ${++progressIndex}\n\n`);
+        } catch (err) {
+          throw new BadRequest("Failed to add tracks: ", err);
+        }
       }
 
       await new Promise((resolve) => {

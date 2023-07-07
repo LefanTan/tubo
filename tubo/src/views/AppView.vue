@@ -147,8 +147,12 @@ async function onStartSync() {
   <q-page>
     <div class="step ready">
       <h2>Step 1. Select or Create a playlist</h2>
-      <p>we'll place all your liked songs into this playlist</p>
-      <button @click="showPlaylistPopup = true">Select Playlist</button>
+      <p>We'll place all your liked songs into this playlist. We recommend making a new playlist</p>
+      <div class="action">
+        <button @click="showPlaylistPopup = true">Select Playlist</button>
+        <span>or</span>
+        <button @click="showCreatePlaylistPopup = true">Create Playlist</button>
+      </div>
     </div>
 
     <div v-if="selectedPlaylist" class="selected-playlist">
@@ -177,10 +181,7 @@ async function onStartSync() {
       }"
     >
       <h2>Step 2. Sync!</h2>
-      <p>
-        if there are already existing songs in the playlist, we'll just append your liked songs to
-        the playlist
-      </p>
+      <p>If there are already existing songs in the playlist, it will be overwritten!</p>
       <button @click="onStartSync">Sync</button>
 
       <div v-if="syncInfo.syncing" class="w-full mt-8">
@@ -310,6 +311,10 @@ async function onStartSync() {
 
   button {
     @apply border-4 border-black rounded-md p-2 w-64 font-semibold bg-primary-400 text-xl;
+  }
+
+  .action {
+    @apply flex items-center justify-center flex-col sm:flex-row gap-4 gap-y-2;
   }
 }
 

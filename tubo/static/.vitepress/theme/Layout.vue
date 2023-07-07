@@ -65,15 +65,14 @@ const { site, frontmatter } = useData()
     </div>
   </div>
 
-  <div class="banner-bottom">
-    <!-- banner-bottom -->
+  <!-- <div class="banner-bottom">
     <ins
       class="adsbygoogle"
       style="display: inline-block; width: 728px; height: 90px"
       data-ad-client="ca-pub-9640914157903339"
       data-ad-slot="4354502074"
     ></ins>
-  </div>
+  </div> -->
 </template>
 
 <style lang="scss">
