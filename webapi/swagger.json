@@ -109,7 +109,7 @@
         ]
       }
     },
-    "/rest/sync": {
+    "/rest/{user_id}/sync": {
       "get": {
         "operationId": "indexControllerSync",
         "responses": {
@@ -119,6 +119,14 @@
         },
         "description": "Syncs the user's Spotify library with the selected playlist",
         "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "query",
             "name": "playlist_id",

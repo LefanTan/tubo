@@ -10,11 +10,11 @@ export const useUserStore = defineStore('user', () => {
   const spotifyUser = ref<SpotifyUser | null>(null)
   const tuboUser = ref<User | null>(null)
 
-  function logout() {
+  async function logout() {
     Cookies.remove('access_token')
     Cookies.remove('user_id')
 
-    router.push('/')
+    await router.push({ name: 'login' })
   }
 
   return {

@@ -6,6 +6,7 @@ import { AuthMiddleware } from "@src/middlewares/AuthMiddleware";
 import { CreatePlaylistRequest } from "@src/models/CreatePlaylistRequest";
 import { Playlist } from "@src/models/Playlist";
 import { Track } from "@src/models/Track";
+import { SupabaseService } from "@src/services";
 import {
   BodyParams,
   Context,
@@ -29,17 +30,22 @@ import fetch from "node-fetch";
 
 @Controller("/")
 export class IndexController {
+  constructor(private readonly supabaseService: SupabaseService) {
+    //
+  }
+
   @Get("/")
   get() {
     return { message: "success" };
   }
 
-  @Get("/sync")
+  @Get("/:user_id/sync")
   @Description("Syncs the user's Spotify library with the selected playlist")
   @AcceptMime("text/event-stream")
   @UseAuth(AuthMiddleware)
   async sync(
     @Context() ctx: Context,
+    @PathParams("user_id") userId: string,
     @QueryParams("playlist_id") playlistId: string
   ) {
     const token = ctx.get("token");
@@ -198,10 +204,38 @@ export class IndexController {
       } catch (err) {
         throw new BadRequest("Failed to add tracks: ", err);
       }
+    }
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, 25);
-      });
+    console.log("START", userId);
+    const { data, error } = await this.supabaseService.supabase
+      .from("synced_playlists")
+      .select("id")
+      .eq("user_id", userId);
+
+    console.log("ID", data?.[0].id);
+    console.log("error", error);
+
+    // Update existing sync entry if exist
+    if (data?.[0].id) {
+      await this.supabaseService.supabase
+        .from("synced_playlists")
+        .update({
+          playlist_id: playlistId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", data?.[0].id);
+    } else {
+      const data = await this.supabaseService.supabase
+        .from("synced_playlists")
+        .insert([
+          {
+            user_id: userId,
+            playlist_id: playlistId,
+          },
+        ])
+        .select("*");
+
+      console.log(data);
     }
 
     res.end();
@@ -272,7 +306,7 @@ export class IndexController {
     );
 
     if (!res.ok) {
-      throw new BadRequest("Failed to create playlist: ", res);
+      throw new BadRequest("Failed to create playlist");
     }
 
     const resJson = await res.json();

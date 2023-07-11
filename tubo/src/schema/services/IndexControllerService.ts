@@ -24,16 +24,21 @@ export class IndexControllerService {
 
     /**
      * Syncs the user's Spotify library with the selected playlist
+     * @param userId
      * @param playlistId
      * @returns any Success
      * @throws ApiError
      */
     public indexControllerSync(
+        userId: string,
         playlistId?: string,
     ): CancelablePromise<any> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/rest/sync',
+            url: '/rest/{user_id}/sync',
+            path: {
+                'user_id': userId,
+            },
             query: {
                 'playlist_id': playlistId,
             },

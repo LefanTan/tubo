@@ -105,7 +105,9 @@ async function onStartSync() {
   if (syncInfo.value.syncing || !selectedPlaylistId.value) return
 
   await fetchEventSource(
-    `${import.meta.env.VITE_WEBAPI_URL}/rest/sync?playlist_id=${selectedPlaylistId.value}`,
+    `${import.meta.env.VITE_WEBAPI_URL}/rest/${$store.user.tuboUser?.id}/sync?playlist_id=${
+      selectedPlaylistId.value
+    }`,
     {
       openWhenHidden: true,
       headers: {

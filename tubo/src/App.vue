@@ -6,8 +6,8 @@ import { onMounted } from 'vue'
 const $store = useStore()
 const routes = useRoute()
 
-function onLogout() {
-  $store.user.logout()
+async function onLogout() {
+  await $store.user.logout()
 }
 
 onMounted(() => {
