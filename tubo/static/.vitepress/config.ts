@@ -2,12 +2,20 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'Tubo - Share your Spotify Liked Songs',
+  title: 'Tubo - Share your Liked Songs on Spotify',
   description:
     'Tubo is a simple tool to help Spotify Users convert their liked songs into a shareable playlist. With this, easily share your liked songs so your friends/family knows about your impeccable music taste!',
   cleanUrls: true,
   mpa: true,
+  titleTemplate: false,
   head: [
+    [
+      'link',
+      {
+        rel: 'icon',
+        href: '/favicon.ico'
+      }
+    ],
     [
       'link',
       {
