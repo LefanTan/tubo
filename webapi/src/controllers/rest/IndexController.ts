@@ -206,14 +206,17 @@ export class IndexController {
       }
     }
 
-    console.log("START", userId);
+    // Need to use upsert here because there is an odd bug where if the table is empty, the following query hangs
     const { data, error } = await this.supabaseService.supabase
       .from("synced_playlists")
-      .select("id")
-      .eq("user_id", userId);
-
-    console.log("ID", data?.[0].id);
-    console.log("error", error);
+      .upsert(
+        {
+          user_id: userId,
+          playlist_id: playlistId,
+        },
+        { onConflict: "user_id" }
+      )
+      .select("id");
 
     // Update existing sync entry if exist
     if (data?.[0].id) {
@@ -225,7 +228,7 @@ export class IndexController {
         })
         .eq("id", data?.[0].id);
     } else {
-      const data = await this.supabaseService.supabase
+      await this.supabaseService.supabase
         .from("synced_playlists")
         .insert([
           {
@@ -234,8 +237,6 @@ export class IndexController {
           },
         ])
         .select("*");
-
-      console.log(data);
     }
 
     res.end();
