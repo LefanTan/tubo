@@ -51,7 +51,7 @@ export class IndexController {
       throw new BadRequest("Unauthorized: Incorrect token provided");
     }
 
-    const days = 4;
+    const days = 3;
     const threshold = days * 24 * 60 * 60 * 1000; // 4 days in ms
 
     const { data: syncedPlaylists, error } = await this.supabaseService.supabase

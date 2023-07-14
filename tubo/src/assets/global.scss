@@ -2,7 +2,6 @@
 
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
 
 :root {
   --primary-400: #{$primary};
@@ -58,3 +57,5 @@ h2 {
   max-height: 100px;
   z-index: 9999;
 }
+
+@tailwind utilities;
