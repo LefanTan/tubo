@@ -23,6 +23,18 @@ export class IndexControllerService {
     }
 
     /**
+     * Represents a job that batch syncs a maximum 50 users' playlists that exceeded a certain threshold
+     * @returns any Success
+     * @throws ApiError
+     */
+    public indexControllerBatchSyncPlaylist(): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/rest/batch-sync-playlist',
+        });
+    }
+
+    /**
      * Syncs the user's Spotify library with the selected playlist
      * @param userId
      * @param playlistId

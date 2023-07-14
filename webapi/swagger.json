@@ -109,6 +109,21 @@
         ]
       }
     },
+    "/rest/batch-sync-playlist": {
+      "post": {
+        "operationId": "indexControllerBatchSyncPlaylist",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "description": "Represents a job that batch syncs a maximum 50 users' playlists that exceeded a certain threshold",
+        "parameters": [],
+        "tags": [
+          "IndexController"
+        ]
+      }
+    },
     "/rest/{user_id}/sync": {
       "get": {
         "operationId": "indexControllerSync",

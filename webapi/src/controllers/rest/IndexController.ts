@@ -1,5 +1,6 @@
 import {
   convertTrackResponseToTracks,
+  getRefreshToken,
   makeSpotifyRequestWithBackoff,
 } from "@src/helpers/misc";
 import { AuthMiddleware } from "@src/middlewares/AuthMiddleware";
@@ -37,6 +38,197 @@ export class IndexController {
   @Get("/")
   get() {
     return { message: "success" };
+  }
+
+  @Post("/batch-sync-playlist")
+  @Description(
+    "Represents a job that batch syncs a maximum 50 users' playlists that exceeded a certain threshold"
+  )
+  @UseAuth(AuthMiddleware)
+  async batchSyncPlaylist(@Context() ctx: Context) {
+    const token = ctx.get("token");
+    if (token !== "tubo-internal") {
+      throw new BadRequest("Unauthorized: Incorrect token provided");
+    }
+
+    const days = 4;
+    const threshold = days * 24 * 60 * 60 * 1000; // 4 days in ms
+
+    const { data: syncedPlaylists, error } = await this.supabaseService.supabase
+      .from("synced_playlists")
+      .select("*, users(display_name, refresh_token)")
+      .limit(50)
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      throw new BadRequest("Failed to get synced_playlists: ", error);
+    }
+
+    const jobs = await Promise.allSettled(
+      syncedPlaylists.map(async (playlistJob) => {
+        // NOTE: Supabase returns users as object, not array....
+        const user = playlistJob.users as any;
+
+        const lastSyncedAt = new Date(playlistJob.updated_at!).getTime();
+        const now = new Date().getTime();
+
+        // if (now - lastSyncedAt <= threshold) {
+        //   throw new Error(
+        //     `Not updating playlist: ${playlistJob.playlist_id} as it was last updated in less than ${days} days ago`
+        //   );
+        // }
+
+        const refreshToken = user?.refresh_token;
+
+        if (!refreshToken) {
+          throw new Error(
+            "No refresh token found for user: " + user?.display_name
+          );
+        }
+
+        // Grab access token for user
+        const accessToken = await getRefreshToken(refreshToken);
+
+        // Get existing playlist items.
+        const existingPlaylistItemTotalRes =
+          await makeSpotifyRequestWithBackoff(
+            `https://api.spotify.com/v1/playlists/${playlistJob.playlist_id}/tracks?fields=total`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: "Bearer " + accessToken,
+                "Content-Type": "application/json",
+              },
+            }
+          ).then((res) => res.json());
+
+        const existingPlaylistItemTotal =
+          existingPlaylistItemTotalRes["total"] ?? 0;
+
+        let offset = 0;
+
+        const firstSavedTracksRes = await makeSpotifyRequestWithBackoff(
+          `https://api.spotify.com/v1/me/tracks?limit=50&offset=${offset++}`,
+          {
+            headers: {
+              Authorization: "Bearer " + accessToken,
+            },
+          }
+        );
+
+        const allTracks: Track[] = [];
+
+        const { tracks: firstTracks, total } =
+          await convertTrackResponseToTracks(firstSavedTracksRes);
+
+        allTracks.push(...firstTracks);
+
+        // Keep requesting tracks until we have all of them
+        while (allTracks.length < total) {
+          const results = await makeSpotifyRequestWithBackoff(
+            `https://api.spotify.com/v1/me/tracks?limit=50&offset=${
+              offset * 50
+            }`,
+            {
+              headers: {
+                Authorization: "Bearer " + accessToken,
+              },
+            }
+          );
+
+          const { tracks } = await convertTrackResponseToTracks(results);
+
+          allTracks.push(...tracks);
+          offset++;
+
+          // wait 50ms to avoid rate limiting
+          await new Promise((resolve) => {
+            setTimeout(resolve, 50);
+          });
+        }
+
+        allTracks.sort((a, b) => {
+          return (
+            new Date(b.added_at).getTime() - new Date(a.added_at).getTime()
+          );
+        });
+
+        let tracksAdded = 0;
+
+        if (existingPlaylistItemTotal > 0) {
+          // Add 100 tracks at a time
+          const tracksToAdd = allTracks.slice(
+            tracksAdded,
+            Math.min(existingPlaylistItemTotal, tracksAdded + 100)
+          );
+
+          try {
+            await makeSpotifyRequestWithBackoff(
+              `https://api.spotify.com/v1/playlists/${playlistJob.playlist_id}/tracks`,
+              {
+                method: "PUT",
+                headers: {
+                  Authorization: "Bearer " + accessToken,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  uris: tracksToAdd.map((track) => track.uri),
+                }),
+              }
+            );
+
+            tracksAdded += tracksToAdd.length;
+          } catch (err) {
+            throw new BadRequest("Failed to replace tracks: ", err);
+          }
+        }
+
+        // Push all remaining liked tracks to the playlist
+        while (tracksAdded < allTracks.length) {
+          // Add 100 tracks at a time
+          const tracksToAdd = allTracks.slice(tracksAdded, tracksAdded + 100);
+
+          try {
+            await makeSpotifyRequestWithBackoff(
+              `https://api.spotify.com/v1/playlists/${playlistJob.playlist_id}/tracks`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: "Bearer " + accessToken,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  position: tracksAdded,
+                  uris: tracksToAdd.map((track) => track.uri),
+                }),
+              }
+            );
+
+            tracksAdded += tracksToAdd.length;
+          } catch (err) {
+            throw new BadRequest("Failed to add tracks: ", err);
+          }
+        }
+
+        await this.supabaseService.supabase
+          .from("synced_playlists")
+          .update({
+            playlist_id: playlistJob.playlist_id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", playlistJob.id);
+
+        return playlistJob;
+      })
+    );
+
+    return jobs.map((job) => {
+      if (job.status === "fulfilled") {
+        return { playlist: job.value };
+      } else {
+        return { reason: job.reason?.message };
+      }
+    });
   }
 
   @Get("/:user_id/sync")
@@ -207,7 +399,7 @@ export class IndexController {
     }
 
     // Need to use upsert here because there is an odd bug where if the table is empty, the following query hangs
-    const { data, error } = await this.supabaseService.supabase
+    const { data } = await this.supabaseService.supabase
       .from("synced_playlists")
       .upsert(
         {

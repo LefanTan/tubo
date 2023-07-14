@@ -1,5 +1,5 @@
 import { isProduction } from "@src/config/envs";
-import { generateRandomString } from "@src/helpers/misc";
+import { generateRandomString, getRefreshToken } from "@src/helpers/misc";
 import { AuthMiddleware } from "@src/middlewares";
 import { ProfileResponse } from "@src/models/ProfileResponse";
 import { SpotifyUser } from "@src/models/User";
@@ -158,9 +158,7 @@ export class AuthController {
 
     if (spotifyRes.status === 401) {
       try {
-        newToken = await this.getRefreshToken(
-          tuboUser?.["refresh_token"] ?? ""
-        );
+        newToken = await getRefreshToken(tuboUser?.["refresh_token"] ?? "");
 
         spotifyRes = await fetch("https://api.spotify.com/v1/me", {
           headers: {
@@ -181,36 +179,5 @@ export class AuthController {
       tuboUser: tuboUser,
       newAccessToken: newToken,
     };
-  }
-
-  async getRefreshToken(refreshToken: string): Promise<string> {
-    // Refresh access token and try again
-    const form = new URLSearchParams();
-    form.append("refresh_token", refreshToken);
-    form.append("grant_type", "refresh_token");
-
-    const refreshAccessRes = await fetch(
-      "https://accounts.spotify.com/api/token",
-      {
-        body: form,
-        headers: {
-          Authorization:
-            "Basic " +
-            Buffer.from(
-              process.env.SPOTIFY_CLIENT_ID +
-                ":" +
-                process.env.SPOTIFY_CLIENT_SECRET
-            ).toString("base64"),
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        method: "POST",
-      }
-    )
-      .catch((err) => {
-        throw new Error("Failed to refresh access token");
-      })
-      .then((res) => res.json());
-
-    return refreshAccessRes["access_token"];
   }
 }
