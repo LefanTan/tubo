@@ -32,7 +32,10 @@ const { site, frontmatter } = useData()
       </h1>
       <p class="text-gray-500 sm:text-xl mt-4">
         yup, you can finally share all your liked songs to your friends with just a couple
-        <strong>clicks</strong> of a button.
+        <strong>clicks</strong> of a button. <br />
+        <br />
+        Tubo will also keep your playlist <strong>up to date</strong> with your liked songs every
+        couple of days.
       </p>
     </div>
 
