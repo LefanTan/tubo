@@ -72,11 +72,11 @@ export class IndexController {
         const lastSyncedAt = new Date(playlistJob.updated_at!).getTime();
         const now = new Date().getTime();
 
-        // if (now - lastSyncedAt <= threshold) {
-        //   throw new Error(
-        //     `Not updating playlist: ${playlistJob.playlist_id} as it was last updated in less than ${days} days ago`
-        //   );
-        // }
+        if (now - lastSyncedAt <= threshold) {
+          throw new Error(
+            `Not updating playlist: ${playlistJob.playlist_id} as it was last updated in less than ${days} days ago`
+          );
+        }
 
         const refreshToken = user?.refresh_token;
 
