@@ -95,7 +95,7 @@ export class AuthController {
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      domain: isProduction ? "web.app" : "localhost",
+      domain: isProduction ? ".web.app" : "localhost",
     });
 
     // Store/Update refresh token in Supabase
@@ -123,7 +123,7 @@ export class AuthController {
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      domain: isProduction ? "web.app" : "localhost",
+      domain: isProduction ? ".web.app" : "localhost",
     });
 
     return ctx.response.redirect(302, this.appUrl);
