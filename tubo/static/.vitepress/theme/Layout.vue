@@ -5,15 +5,15 @@ const { site, frontmatter } = useData()
 </script>
 
 <template>
-  <div class="border-b-4 border-black bg-white text-black">
-    <div class="max-width py-4 flex justify-between items-center">
+  <div class="text-black bg-white border-b-4 border-black">
+    <div class="flex items-center justify-between py-4 max-width">
       <a href="/" class="logo"> tubo </a>
-      <a href="/app/login" class="btn px-8 py-3 text-2xl">start now</a>
+      <a href="/app/login" class="px-8 py-3 text-2xl btn">start now</a>
     </div>
   </div>
 
   <main class="landing" v-if="frontmatter.home">
-    <!-- left side ads -->
+    <!-- left side ads display -->
     <ins
       class="adsbygoogle"
       style="display: block"
@@ -30,7 +30,7 @@ const { site, frontmatter } = useData()
         Convert your Spotify <strong>Liked Songs</strong> to a
         <strong>Shareable Playlist</strong>
       </h1>
-      <p class="text-gray-500 sm:text-xl mt-4">
+      <p class="mt-4 text-gray-500 sm:text-xl">
         yup, you can finally share all your liked songs to your friends with just a couple
         <strong>clicks</strong> of a button. <br />
         <br />
