@@ -18,7 +18,7 @@ import querystring from "node:querystring";
 export class AuthController {
   stateCompare: Set<string> = new Set();
   redirectUrl = isProduction
-    ? "https://tubo-webapi-9ba99/rest/auth/redirect"
+    ? "https://tubo-webapi-9ba99.web.app/rest/auth/redirect"
     : "http://localhost:8087/rest/auth/redirect";
 
   appUrl = isProduction

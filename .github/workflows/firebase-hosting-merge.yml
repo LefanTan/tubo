@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         working-directory: tubo/
         env:
-          VITE_WEBAPI_URL: "https://tubo-webapi-9ba99"
+          VITE_WEBAPI_URL: "https://tubo-webapi-9ba99.web.app"
         run: |
           npm ci --prefer-offline --no-audit
           npm run build
