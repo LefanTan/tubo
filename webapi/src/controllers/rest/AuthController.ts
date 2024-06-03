@@ -93,8 +93,9 @@ export class AuthController {
 
     ctx.response.cookie("access_token", json["access_token"], {
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+      domain: isProduction ? "web.app" : "localhost",
     });
 
     // Store/Update refresh token in Supabase
@@ -120,8 +121,9 @@ export class AuthController {
 
     ctx.response.cookie("user_id", userRes["id"], {
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+      domain: isProduction ? "web.app" : "localhost",
     });
 
     return ctx.response.redirect(302, this.appUrl);
