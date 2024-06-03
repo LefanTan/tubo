@@ -17,7 +17,7 @@ jobs:
       - name: Use Node.js and Setup Cache
         uses: actions/setup-node@v3
         with:
-          node-version: "16.14.2"
+          node-version: "18.0.0"
           cache: "npm"
           cache-dependency-path: tubo/package-lock.json
 
