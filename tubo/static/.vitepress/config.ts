@@ -43,7 +43,7 @@ export default defineConfig({
       'meta',
       {
         property: 'og:url',
-        content: 'https://tubo.live'
+        content: 'https://tubo-ca974.web.app/'
       }
     ],
     [
@@ -72,7 +72,7 @@ export default defineConfig({
       'meta',
       {
         property: 'og:image',
-        content: 'https://tubo.live/preview.png'
+        content: 'https://tubo-ca974.web.app/preview.png'
       }
     ],
     // Twitter meta tags
@@ -87,14 +87,14 @@ export default defineConfig({
       'meta',
       {
         property: 'twitter:domain',
-        content: 'tubo.live'
+        content: 'tubo-ca974.web.app'
       }
     ],
     [
       'meta',
       {
         property: 'twitter:url',
-        content: 'https://tubo.live'
+        content: 'https://tubo-ca974.web.app/'
       }
     ],
     [
@@ -116,7 +116,7 @@ export default defineConfig({
       'meta',
       {
         property: 'twitter:image',
-        content: 'https://tubo.live/preview.png'
+        content: 'https://tubo-ca974.web.app/preview.png'
       }
     ],
     // GTags

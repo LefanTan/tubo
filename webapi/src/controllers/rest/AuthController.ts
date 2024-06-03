@@ -18,10 +18,12 @@ import querystring from "node:querystring";
 export class AuthController {
   stateCompare: Set<string> = new Set();
   redirectUrl = isProduction
-    ? "https://api.tubo.live/rest/auth/redirect"
+    ? "https://tubo-yludnsqgyq-uc.a.run.app/rest/auth/redirect"
     : "http://localhost:8087/rest/auth/redirect";
 
-  appUrl = isProduction ? "https://tubo.live/app" : "http://localhost:5173/app";
+  appUrl = isProduction
+    ? "https://tubo-ca974.web.app/app"
+    : "http://localhost:5173/app";
 
   constructor(private readonly supabaseService: SupabaseService) {
     //
@@ -93,7 +95,7 @@ export class AuthController {
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      domain: isProduction ? "tubo.live" : "localhost",
+      domain: isProduction ? "tubo-ca974.web.app" : "localhost",
     });
 
     // Store/Update refresh token in Supabase
@@ -121,7 +123,7 @@ export class AuthController {
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      domain: isProduction ? "tubo.live" : "localhost",
+      domain: isProduction ? "tubo-ca974.web.app" : "localhost",
     });
 
     return ctx.response.redirect(302, this.appUrl);

@@ -51,7 +51,9 @@ export class Server {
   $beforeRoutesInit() {
     this.app.use(
       cors({
-        origin: isProduction ? "https://tubo.live" : "http://localhost:5173",
+        origin: isProduction
+          ? "https://tubo-ca974.web.app"
+          : "http://localhost:5173",
         credentials: true,
       })
     );
