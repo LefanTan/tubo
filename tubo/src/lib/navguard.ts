@@ -24,7 +24,9 @@ export default function userNavGuard(router: Router) {
         expires: 365
       })
 
-      next('/')
+      next({
+        path: '/'
+      })
       return
     }
 
