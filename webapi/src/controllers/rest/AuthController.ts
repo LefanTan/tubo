@@ -130,7 +130,7 @@ export class AuthController {
     redirectUrl.searchParams.set("access_token", json["access_token"]);
     redirectUrl.searchParams.set("user_id", userRes["id"]);
 
-    return ctx.response.redirect(302, redirectUrl);
+    return ctx.response.redirect(302, redirectUrl.toString());
   }
 
   @Post("/profile")
