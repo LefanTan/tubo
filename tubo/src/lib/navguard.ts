@@ -12,22 +12,20 @@ export default function userNavGuard(router: Router) {
     const $store = useStore()
 
     // Get the URL search params
-    const searchParams = new URLSearchParams(window.location.search)
+    const url = new URL(window.location.href)
 
-    if (searchParams.has('access_token') && searchParams.has('user_id')) {
-      Cookies.set('access_token', searchParams.get('access_token') ?? '', {
+    if (url.searchParams.has('access_token') && url.searchParams.has('user_id')) {
+      Cookies.set('access_token', url.searchParams.get('access_token') ?? '', {
         // 1 year expiration
         expires: 365
       })
-      Cookies.set('user_id', searchParams.get('user_id') ?? '', {
+      Cookies.set('user_id', url.searchParams.get('user_id') ?? '', {
         // 1 year expiration
         expires: 365
       })
 
-      next({
-        path: '/'
-      })
-      return
+      // Remove the search params
+      window.history.pushState({}, document.title, window.location.pathname)
     }
 
     const accessToken = Cookies.get('access_token')
