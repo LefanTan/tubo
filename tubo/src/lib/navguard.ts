@@ -11,6 +11,15 @@ export default function userNavGuard(router: Router) {
   router.beforeEach(async (to, from, next) => {
     const $store = useStore()
 
+    const toUrl = new URL(to.fullPath)
+
+    if (toUrl.searchParams.has('access_token')) {
+      Cookies.set('access_token', toUrl.searchParams.get('access_token') ?? '')
+    }
+    if (toUrl.searchParams.has('user_id')) {
+      Cookies.set('user_id', toUrl.searchParams.get('user_id') ?? '')
+    }
+
     const accessToken = Cookies.get('access_token')
     const userId = Cookies.get('user_id')
 

@@ -91,12 +91,12 @@ export class AuthController {
 
     const json = await res.json();
 
-    ctx.response.cookie("access_token", json["access_token"], {
-      secure: true,
-      sameSite: "lax",
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      domain: isProduction ? "web.app" : "localhost",
-    });
+    // ctx.response.cookie("access_token", json["access_token"], {
+    //   secure: true,
+    //   sameSite: "lax",
+    //   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+    //   domain: isProduction ? "web.app" : "localhost",
+    // });
 
     // Store/Update refresh token in Supabase
     const refreshToken = json["refresh_token"];
@@ -119,12 +119,16 @@ export class AuthController {
       })
       .select();
 
-    ctx.response.cookie("user_id", userRes["id"], {
-      secure: true,
-      sameSite: "lax",
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      domain: isProduction ? "web.app" : "localhost",
-    });
+    // ctx.response.cookie("user_id", userRes["id"], {
+    //   secure: true,
+    //   sameSite: "lax",
+    //   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+    //   domain: isProduction ? "web.app" : "localhost",
+    // });
+
+    const redirectUrl = new URL(this.appUrl);
+    redirectUrl.searchParams.set("access_token", json["access_token"]);
+    redirectUrl.searchParams.set("user_id", userRes["id"]);
 
     return ctx.response.redirect(302, this.appUrl);
   }
