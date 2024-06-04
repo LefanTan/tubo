@@ -11,13 +11,14 @@ export default function userNavGuard(router: Router) {
   router.beforeEach(async (to, from, next) => {
     const $store = useStore()
 
-    const toUrl = new URL(to.fullPath)
+    // Get the URL search params
+    const searchParams = new URLSearchParams(window.location.search)
 
-    if (toUrl.searchParams.has('access_token')) {
-      Cookies.set('access_token', toUrl.searchParams.get('access_token') ?? '')
+    if (searchParams.has('access_token')) {
+      Cookies.set('access_token', searchParams.get('access_token') ?? '')
     }
-    if (toUrl.searchParams.has('user_id')) {
-      Cookies.set('user_id', toUrl.searchParams.get('user_id') ?? '')
+    if (searchParams.has('user_id')) {
+      Cookies.set('user_id', searchParams.get('user_id') ?? '')
     }
 
     const accessToken = Cookies.get('access_token')
