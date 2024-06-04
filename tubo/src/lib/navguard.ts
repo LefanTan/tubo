@@ -25,7 +25,7 @@ export default function userNavGuard(router: Router) {
       })
 
       // Remove the search params
-      window.history.replaceState({}, document.title, window.location.pathname)
+      window.location.href = window.location.href.split('?')[0]
     }
 
     const accessToken = Cookies.get('access_token')
