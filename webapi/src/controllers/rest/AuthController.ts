@@ -127,6 +127,11 @@ export class AuthController {
     // });
 
     const redirectUrl = new URL(this.appUrl);
+    // ! Alternative - we should instead store a session id and pass that to the client instead.
+    // ! AuthMiddleware will then check the session id against the user's session id in the database,
+    // ! and populate the request object with an access token
+    //
+    // Why? Session Id can be invalidated more easily and are less sensitive
     redirectUrl.searchParams.set("access_token", json["access_token"]);
     redirectUrl.searchParams.set("user_id", userRes["id"]);
 
