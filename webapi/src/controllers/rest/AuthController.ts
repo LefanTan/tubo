@@ -127,11 +127,13 @@ export class AuthController {
     // });
 
     const redirectUrl = new URL(this.appUrl);
-    // ! Alternative - we should instead store a session id and pass that to the client instead.
-    // ! AuthMiddleware will then check the session id against the user's session id in the database,
-    // ! and populate the request object with an access token
-    //
-    // Why? Session Id can be invalidated more easily and are less sensitive
+
+    /**
+     * * Ok, because our app is web app (web + server), we don't need PKCE.
+     * Our current flow makes sense, we store refresh token in DB, and access token in cookie.
+     * When access token expires, we refresh it using the refresh token.
+     * When refresh token is revoked, user has to login again.
+     */
     redirectUrl.searchParams.set("access_token", json["access_token"]);
     redirectUrl.searchParams.set("user_id", userRes["id"]);
 
